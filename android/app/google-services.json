@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "843625605463",
+    "project_id": "lista-de-compras-44869",
+    "storage_bucket": "lista-de-compras-44869.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843625605463:android:994cc9e297658547fe7612",
+        "android_client_info": {
+          "package_name": "br.com.gabriel.app_lista_compras"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvSCByKcsrcrNR9iZFNGs4f-UzHxpzxlc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
