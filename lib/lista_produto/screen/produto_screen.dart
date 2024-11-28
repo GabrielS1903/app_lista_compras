@@ -2,15 +2,17 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:app_lista_compras/lista_produto/util/enum.dart';
-import 'package:app_lista_compras/lista_produto/service/produto_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import '../../lista_compra/model/compra_model.dart';
 import '../model/produto_model.dart';
+import '../util/enum.dart';
+import '../service/produto_service.dart';
 import 'widget/componente_produto.dart';
 
 class ProdutoScreen extends StatefulWidget {
   final CompraModel listin;
+
   const ProdutoScreen({super.key, required this.listin});
 
   @override
@@ -161,12 +163,12 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
   }
 
   showFormModal({Produto? model}) {
-    // Labels à serem mostradas no Modal
+    // Labels a serem exibidos no Modal
     String labelTitle = "Adicionar Produto";
     String labelConfirmationButton = "Salvar";
     String labelSkipButton = "Cancelar";
 
-    // Controlador dos campos do produto
+    // Controladores dos campos do produto
     TextEditingController nameController = TextEditingController();
     TextEditingController amountController = TextEditingController();
     TextEditingController priceController = TextEditingController();
@@ -189,25 +191,39 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
       isComprado = model.isComprado;
     }
 
-    // Função do Flutter que mostra o modal na tela
+    // Mostra o modal na tela
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      // Define que as bordas verticais serão arredondadas
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
         ),
       ),
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          padding: const EdgeInsets.all(32.0),
-
-          // Formulário com Título, Campo e Botões
-          child: ListView(
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 32.0,
+            right: 32.0,
+            top: 32.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(labelTitle, style: Theme.of(context).textTheme.headlineMedium),
+              // Título
+              Text(
+                labelTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Campo para o nome do produto
               TextFormField(
                 controller: nameController,
                 keyboardType: TextInputType.name,
@@ -217,9 +233,9 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                   icon: Icon(Icons.abc_rounded),
                 ),
               ),
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 16),
+
+              // Campo para a quantidade
               TextFormField(
                 controller: amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -231,9 +247,9 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                   icon: Icon(Icons.numbers),
                 ),
               ),
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 16),
+
+              // Campo para o preço
               TextFormField(
                 controller: priceController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -245,9 +261,9 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                   icon: Icon(Icons.attach_money_rounded),
                 ),
               ),
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 16),
+
+              // Botões de ação
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -257,30 +273,21 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                     },
                     child: Text(labelSkipButton),
                   ),
-                  const SizedBox(
-                    width: 16,
-                  ),
+                  const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: () {
-                      // Criar um objeto Produto com as infos
+                      // Criar um objeto Produto com as informações
                       Produto produto = Produto(
-                        id: const Uuid().v1(),
-                        name: nameController.text,
+                        id: model?.id ?? const Uuid().v1(),
+                        name: nameController.text.trim(),
                         isComprado: isComprado,
+                        amount: amountController.text.isNotEmpty
+                            ? double.tryParse(amountController.text)
+                            : null,
+                        price: priceController.text.isNotEmpty
+                            ? double.tryParse(priceController.text)
+                            : null,
                       );
-
-                      // Usar id do model
-                      if (model != null) {
-                        produto.id = model.id;
-                      }
-
-                      if (amountController.text != "") {
-                        produto.amount = double.parse(amountController.text);
-                      }
-
-                      if (priceController.text != "") {
-                        produto.price = double.parse(priceController.text);
-                      }
 
                       // Salvar no Firestore
                       produtoService.adicionarProduto(
@@ -288,13 +295,13 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                         produto: produto,
                       );
 
-                      // Fechar o Modal
+                      // Fechar o modal
                       Navigator.pop(context);
                     },
                     child: Text(labelConfirmationButton),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         );
@@ -302,19 +309,15 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
     );
   }
 
-  refresh({QuerySnapshot<Map<String, dynamic>>? snapshot}) async {
-    List<Produto> produtosResgatados = await produtoService.lerProdutos(
-        isDecrescente: isDecrescente,
-        listinId: widget.listin.id,
-        ordem: ordem,
-        snapshot: snapshot);
+  refresh() async {
+  List<Produto> produtosResgatados = await produtoService.lerProdutos(
+    isDecrescente: isDecrescente,
+    listinId: widget.listin.id,
+    ordem: ordem,
+  );
 
-    if (snapshot != null) {
-      verificarAlteracao(snapshot);
-    }
-
-    filtrarProdutos(produtosResgatados);
-  }
+  filtrarProdutos(produtosResgatados);
+}
 
   filtrarProdutos(List<Produto> listaProdutos) {
     List<Produto> tempPlanejados = [];
@@ -334,13 +337,19 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
     });
   }
 
-  setupListeners() {
-    listener = produtoService.conectarStream(
-        onChange: refresh,
-        listinId: widget.listin.id,
-        ordem: ordem,
-        isDecrescente: isDecrescente);
-  }
+  void setupListeners() {
+  listener = produtoService.conectarStream(
+    listinId: widget.listin.id,
+    ordem: ordem,
+    isDecrescente: isDecrescente,
+    onChange: (QuerySnapshot<Map<String, dynamic>> snapshot) {
+      final List<Produto> produtos = snapshot.docs
+          .map((doc) => Produto.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+      filtrarProdutos(produtos);
+    },
+  );
+}
 
   removerProduto(Produto produto) async {
     await produtoService.removerProduto(

@@ -4,6 +4,7 @@ class Produto {
   double? price;
   double? amount;
   bool isComprado;
+  String? uid;
 
   Produto({
     required this.id,
@@ -11,6 +12,7 @@ class Produto {
     required this.isComprado,
     this.price,
     this.amount,
+    this.uid,
   });
 
   Produto.fromMap(Map<String, dynamic> map)
@@ -18,7 +20,8 @@ class Produto {
         name = map["name"],
         isComprado = map["isComprado"],
         price = map["price"],
-        amount = map["amount"];
+        amount = map["amount"],
+        uid = map["uid"];
 
   Map<String, dynamic> toMap() {
     return {
@@ -27,6 +30,7 @@ class Produto {
       "isComprado": isComprado,
       "price": price,
       "amount": amount,
+      "uid": uid,
     };
   }
 }
