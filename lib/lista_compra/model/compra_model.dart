@@ -1,7 +1,7 @@
 class CompraModel {
   String id;
   String name;
-  String? uid; // Vincula ao usuário
+  String? uid;
 
   CompraModel({required this.id, required this.name, this.uid});
 

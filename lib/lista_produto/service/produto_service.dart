@@ -6,7 +6,6 @@ import '../util/enum.dart';
 class ProdutoService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Adiciona ou atualiza um produto em uma lista específica
   Future<void> adicionarProduto({
     required String listinId,
     required Produto produto,
@@ -23,7 +22,6 @@ class ProdutoService {
     }
   }
 
-  /// Lê todos os produtos de uma lista para o usuário atual
   Future<List<Produto>> lerProdutos({
   required String listinId,
   required OrdemProduto ordem,
@@ -46,7 +44,6 @@ class ProdutoService {
   return temp;
 }
 
-  /// Alterna o status "comprado" de um produto
   Future<void> alternarComprado({
     required Produto produto,
     required String listinId,
@@ -64,7 +61,6 @@ class ProdutoService {
     }
   }
 
-  /// Remove um produto de uma lista específica
   Future<void> removerProduto({
     required String listinId,
     required Produto produto,
@@ -81,7 +77,6 @@ class ProdutoService {
     }
   }
 
-  /// Conecta um stream à coleção de produtos para escutar alterações em tempo real
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> conectarStream({
     required String listinId,
     required OrdemProduto ordem,

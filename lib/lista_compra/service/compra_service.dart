@@ -6,7 +6,6 @@ class ListinService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Adiciona ou atualiza uma lista de compras no Firestore
   Future<void> adicionarListin({
     required CompraModel compra,
   }) async {
@@ -18,14 +17,13 @@ class ListinService {
 
       await _firestore.collection("listins").doc(compra.id).set({
         ...compra.toMap(),
-        "uid": uid, // Vincula a lista ao usuário
+        "uid": uid,
       });
     } catch (e) {
       throw Exception('Erro ao adicionar a lista: $e');
     }
   }
 
-  /// Lê todas as listas de compras associadas ao usuário atual
   Future<List<CompraModel>> lerListins() async {
     try {
       final String? uid = _auth.currentUser?.uid;
@@ -44,16 +42,13 @@ class ListinService {
     }
   }
 
-  /// Remove uma lista de compras e todos os produtos associados
   Future<void> removerListin({required String listinId}) async {
     try {
-      // Referência para os produtos dentro da lista
       final produtosRef = _firestore
           .collection("listins")
           .doc(listinId)
           .collection("produtos");
 
-      // Excluir todos os produtos associados à lista
       final produtosSnapshot = await produtosRef.get();
       final batch = _firestore.batch();
 
@@ -61,10 +56,8 @@ class ListinService {
         batch.delete(produtoDoc.reference);
       }
 
-      // Excluir a própria lista de compras
       batch.delete(_firestore.collection("listins").doc(listinId));
 
-      // Executar as operações em batch
       await batch.commit();
     } catch (e) {
       throw Exception('Erro ao remover a lista: $e');

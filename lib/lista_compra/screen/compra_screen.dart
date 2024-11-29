@@ -25,7 +25,7 @@ class _CompraScreenState extends State<CompraScreen> {
   void logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
-      Navigator.pushReplacementNamed(context, '/login'); // Redireciona para a tela de login
+      Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
